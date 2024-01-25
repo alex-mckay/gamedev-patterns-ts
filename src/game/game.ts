@@ -1,11 +1,17 @@
 import { Entity } from "@/utils";
 import { Grid } from "@/grid";
 import { Fleet } from "@/fleet";
-import { Team } from "@/team";
+import { GameInputComponent } from "./components";
 
 export class Game extends Entity {
   private _lastTimestamp = 0;
   private _entities: Entity[] = [];
+
+  constructor(grid: Grid, fleetA: Fleet, fleetB: Fleet) {
+    super();
+
+    this._entities.push(grid, fleetA, fleetB);
+  }
 
   public Update(): void {
     const deltaTime = (Date.now() - this._lastTimestamp) / 1000;
@@ -23,12 +29,11 @@ export class Game extends Entity {
   }
 
   Awake(): void {
+    // add components
+    this.AddComponent(new GameInputComponent());
+
     // wake up all components associated with Game
     super.Awake();
-
-    // instantiate Grid & fleets to the list of children
-    const grid = new Grid();
-    this._entities.push(grid, new Fleet(Team.A, grid), new Fleet(Team.B, grid));
 
     // awake all children
     for (const entity of this._entities) {
