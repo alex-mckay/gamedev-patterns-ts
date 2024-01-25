@@ -1,5 +1,7 @@
 import { Entity } from "@/utils";
 import { Grid } from "@/grid";
+import { Fleet } from "@/fleet";
+import { Team } from "@/team";
 
 export class Game extends Entity {
   private _lastTimestamp = 0;
@@ -24,8 +26,9 @@ export class Game extends Entity {
     // wake up all components associated with Game
     super.Awake();
 
-    // instantiate and Grid to the list of children
-    this._entities.push(new Grid());
+    // instantiate Grid & fleets to the list of children
+    const grid = new Grid();
+    this._entities.push(grid, new Fleet(Team.A, grid), new Fleet(Team.B, grid));
 
     // awake all children
     for (const entity of this._entities) {

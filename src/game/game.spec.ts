@@ -1,6 +1,7 @@
 import { IComponent } from "@/utils";
 import { Grid } from "@/grid";
 import { Game } from "./game";
+import { Fleet } from "@/fleet";
 
 class C1 implements IComponent {
   public Entity: Game;
@@ -94,14 +95,22 @@ describe(">>> Game", () => {
   it("should awake and update all children", () => {
     const spyGridAwake = jest.spyOn(Grid.prototype, "Awake");
     const spyGridUpdate = jest.spyOn(Grid.prototype, "Update");
+    const spyFleetAwake = jest.spyOn(Fleet.prototype, "Awake");
+    const spyFleetUpdate = jest.spyOn(Fleet.prototype, "Update");
 
     expect(spyGridAwake).not.toBeCalled();
     expect(spyGridUpdate).not.toBeCalled();
+    expect(spyFleetAwake).not.toBeCalled();
+    expect(spyFleetUpdate).not.toBeCalled();
 
     game.Awake();
     expect(spyGridAwake).toBeCalled();
+    // should instantiate two fleets
+    expect(spyFleetAwake).toBeCalledTimes(2);
 
     game.Update();
     expect(spyGridUpdate).toBeCalled();
+    // each fleet was updated once in awake, and once more in update
+    expect(spyFleetUpdate).toBeCalledTimes(4);
   });
 });
