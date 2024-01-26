@@ -1,20 +1,27 @@
-import { Entity, Vector2D } from "@/utils";
+import { Entity, IGraphNode, Vector2D } from "@/utils";
 import { NodeDrawComponent } from "./components";
+import { Ship } from "@/ship";
 
-export class Node extends Entity {
-  /**
-   * @todo replace temp property with real functionality
-   */
-  public IsActive = false;
+export class Node extends Entity implements IGraphNode {
+  public IsInLocomotionRange = false;
+  public Ship: Ship | null = null;
+  public IsOnPath = false;
+
   constructor(
     // start is the top left corner of the node
     public readonly Start: Vector2D,
     // end is the bottom right corner of the node
     public readonly End: Vector2D,
     // index is the (row, col) representation of the node's position
-    public readonly Index: Vector2D
+    public readonly Index: Vector2D,
+    // immeadiately adjacent neighbors
+    public readonly Neighbors: Node[]
   ) {
     super();
+  }
+
+  public get Position(): Vector2D {
+    return this.Index;
   }
 
   public Awake(): void {
@@ -52,5 +59,19 @@ export class Node extends Entity {
     }
 
     return true;
+  }
+
+  public FindAndSetInLocomotionRange(range: number): void {
+    if (!this.Ship) {
+      this.IsInLocomotionRange = true;
+    }
+    const newRange = --range;
+    if (newRange <= 0) {
+      return;
+    }
+
+    this.Neighbors.filter((neighbor) => !neighbor.Ship).map((neighbor) =>
+      neighbor.FindAndSetInLocomotionRange(range)
+    );
   }
 }

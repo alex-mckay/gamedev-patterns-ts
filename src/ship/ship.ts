@@ -1,14 +1,34 @@
 import { Fleet } from "@/fleet";
 import { Entity, Vector2D } from "@/utils";
-import { ShipDrawComponent, ShipLocomotionComponent } from "./components";
+import {
+  ShipDrawComponent,
+  ShipLocomotionComponent,
+  ShipLocomotionAnimatedComponent,
+} from "./components";
 import { Node } from "@/node";
+import { Settings } from "@/settings";
 
 export class Ship extends Entity {
   private readonly _locomotionComponent: ShipLocomotionComponent;
+  private _isActive = false;
+
+  public get IsActive(): boolean {
+    return this._isActive;
+  }
+
+  public set IsActive(v: boolean) {
+    this._isActive = v;
+
+    if (v) {
+      this._locomotionComponent.Node.FindAndSetInLocomotionRange(
+        Settings.ships.locomotion.range
+      );
+    }
+  }
+
   constructor(public readonly Factory: Fleet, node: Node) {
     super();
-    this._locomotionComponent = new ShipLocomotionComponent();
-    this._locomotionComponent.Node = node;
+    this._locomotionComponent = new ShipLocomotionAnimatedComponent(node);
   }
 
   public Awake(): void {
@@ -18,7 +38,23 @@ export class Ship extends Entity {
     super.Awake();
   }
 
+  public get Node(): Node {
+    return this._locomotionComponent.Node;
+  }
+
   public get Position(): Vector2D | null {
     return this._locomotionComponent.Position;
+  }
+
+  public get PreviousPosition(): Vector2D | null {
+    return this._locomotionComponent.PreviousPosition;
+  }
+
+  public Move(byPath: Node[]): void {
+    this._locomotionComponent.Path = byPath;
+  }
+
+  public OnMoveCompleted(node: Node): void {
+    this.Node.FindAndSetInLocomotionRange(Settings.ships.locomotion.range);
   }
 }
